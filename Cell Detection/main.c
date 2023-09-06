@@ -8,6 +8,58 @@
 #include <stdio.h>
 #include "cbmp.h"
 
+//Function to convert RGB picture to grayscale with arbitrary threshold
+void toGrayScale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1]){
+  for (int x = 0; x < BMP_WIDTH; x++)
+  {
+    for (int y = 0; y < BMP_HEIGTH; y++)
+    {
+
+      int v = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+
+      if (v > 100) {
+        output_image[x][y][0] = 255;
+        output_image[x][y][0] = 255;
+        output_image[x][y][0] = 255;
+      } else {
+        output_image[x][y][0] = 0;
+        output_image[x][y][0] = 0;
+        output_image[x][y][0] = 0;
+      }
+    }
+  }
+}
+
+//Function to convert grayscale picture to RGB 
+void toRGB(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
+  for (int x = 0; x < BMP_WIDTH; x++)
+  {
+    for (int y = 0; y < BMP_HEIGTH; y++)
+    {
+      output_image[x][y][0] = input_image[x][y][0];
+      output_image[x][y][1] = input_image[x][y][0];
+      output_image[x][y][2] = input_image[x][y][0];
+    }
+  }
+}
+
+//Function to erode grayscale picture 
+void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1]){
+  for (int x = 0; x < BMP_WIDTH; x++)
+  {
+    for (int y = 0; y < BMP_HEIGTH; y++)
+    {
+      if (input_image[x+1][y][0] == 0 || input_image[x][y+1][0] == 0 || input_image[x-1][y][0] == 0 || input_image[x][y-1][0] == 0) 
+      {
+        output_image[x][y][0] = 0;
+      } else
+      {
+        output_image[x][y][0] = 255;
+      }
+    }
+  }
+}
+
 //Function to invert pixels of an image (negative)
 void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for (int x = 0; x < BMP_WIDTH; x++)
