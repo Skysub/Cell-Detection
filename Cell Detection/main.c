@@ -17,7 +17,7 @@ void toGrayScale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 
       int v = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
 
-      if (v > 150) {
+      if (v > 120) {
         output_image[x][y][0] = 255;
         output_image[x][y][0] = 255;
         output_image[x][y][0] = 255;
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 
   //Save image to file
   write_bitmap(RGB_image, argv[2]);
-
+/*
   removeEdges(GS_image);
 
   erode(GS_image, GS_image2);
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
 
   erode(GS_image,GS_image2);
   detectCellsIterator(GS_image2);
-
+*/
   printf("delCount = %d", delCount);
   printf("Done!\n");
   return 0;
