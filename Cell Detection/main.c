@@ -30,6 +30,62 @@ void toGrayScale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
   }
 }
 
+int delCount = 0; 
+void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1],int row, int col){
+  delCount = delCount +1;
+  for (int x = row; x < row+14; x++)
+  {
+    for (int y = col; y < col+14; y++)
+    {
+      output_image[x][y][0] = 0;
+    }
+  }
+
+}
+
+int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1],int row, int col){
+  char delete = 1;
+  char detection = 0;
+  
+  for (int x = row; x < row+14; x++)
+  {
+    if (delete == 0) {break;}
+    for (int y = col; y < col+14; y++)
+    {
+      if (x == row || x == row+13 || y==col || y==col+13)
+      {
+        if (input_image[x][y][0] != 0) {
+          delete = 0;
+          break;
+        } else {
+          continue;
+        }
+
+      } else 
+      { 
+        if (detection == 1) {continue;}
+        else if (input_image[x][y][0] != 0) {detection = 1;}
+      }
+    }
+  }
+
+  if (detection == 0) {delete = 0;}  
+
+  return delete;
+}
+
+void detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1]){
+   for (int x = 0; x < BMP_WIDTH-13; x++)
+  {
+    for (int y = 0; y < BMP_HEIGTH-13; y++)
+    {
+      if (detectCellInstance(input_image, x, y) == 1)
+      {
+        deleteCell(input_image, x, y);
+      }
+    }
+  }
+}
 //Function to convert grayscale picture to RGB 
 void toRGB(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
   for (int x = 0; x < BMP_WIDTH; x++)
@@ -75,8 +131,10 @@ void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsi
 }
 
   //Declaring the array to store the image (unsigned char = unsigned 8 bit)
-  unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-  unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+  //GS(Grayscale) for only 1 color dimension | RGB for 3 color dimensions
+  unsigned char RGB_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
+  unsigned char GS_image[BMP_WIDTH][BMP_HEIGTH][1];
+  unsigned char GS_image2[BMP_WIDTH][BMP_HEIGTH][1];
 
 //Main function
 int main(int argc, char** argv)
@@ -96,14 +154,42 @@ int main(int argc, char** argv)
   printf("Example program - 02132 - A1\n");
 
   //Load image from file
-  read_bitmap(argv[1], input_image);
+  read_bitmap(argv[1], RGB_image);
 
-  //Run inversion
-  invert(input_image,output_image);
+  toGrayScale(RGB_image, GS_image);
+
+  erode(GS_image, GS_image2);
+  detectCellsIterator(GS_image2);
+      
+  erode(GS_image2, GS_image);
+  detectCellsIterator(GS_image);
+      
+  erode(GS_image, GS_image2);
+  detectCellsIterator(GS_image2);
+      
+  erode(GS_image2, GS_image);
+  detectCellsIterator(GS_image);
+  
+  erode(GS_image, GS_image2);
+  detectCellsIterator(GS_image2);
+      
+  erode(GS_image2, GS_image);
+  detectCellsIterator(GS_image);
+  
+  erode(GS_image,GS_image2);
+  detectCellsIterator(GS_image2);
+
+  erode(GS_image2,GS_image);
+  detectCellsIterator(GS_image);
+
+  erode(GS_image,GS_image2);
+  detectCellsIterator(GS_image2);
+
+  toRGB(GS_image2,RGB_image);
 
   //Save image to file
-  write_bitmap(output_image, argv[2]);
-
+  write_bitmap(RGB_image, argv[2]);
+  printf("delCount = %d", delCount);
   printf("Done!\n");
   return 0;
 }
