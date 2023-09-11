@@ -17,7 +17,7 @@ void toGrayScale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS],
 
       int v = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
 
-      if (v > 100) {
+      if (v > 150) {
         output_image[x][y][0] = 255;
         output_image[x][y][0] = 255;
         output_image[x][y][0] = 255;
@@ -116,17 +116,13 @@ void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char ou
   }
 }
 
-//Function to invert pixels of an image (negative)
-void invert(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
-  for (int x = 0; x < BMP_WIDTH; x++)
+void removeEdges(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1]) {
+  for (int i = 0; i < BMP_WIDTH; i++)
   {
-    for (int y = 0; y < BMP_HEIGTH; y++)
-    {
-      for (int c = 0; c < BMP_CHANNELS; c++)
-      {
-      output_image[x][y][c] = 255 - input_image[x][y][c];
-      }
-    }
+    input_image[i][0][0] = 0;
+    input_image[i][BMP_HEIGTH-1][0] = 0;
+    input_image[0][i][0] = 0;
+    input_image[BMP_WIDTH-1][i][0] = 0;
   }
 }
 
@@ -158,6 +154,13 @@ int main(int argc, char** argv)
 
   toGrayScale(RGB_image, GS_image);
 
+  toRGB(GS_image,RGB_image);
+
+  //Save image to file
+  write_bitmap(RGB_image, argv[2]);
+
+  removeEdges(GS_image);
+
   erode(GS_image, GS_image2);
   detectCellsIterator(GS_image2);
       
@@ -185,10 +188,6 @@ int main(int argc, char** argv)
   erode(GS_image,GS_image2);
   detectCellsIterator(GS_image2);
 
-  toRGB(GS_image2,RGB_image);
-
-  //Save image to file
-  write_bitmap(RGB_image, argv[2]);
   printf("delCount = %d", delCount);
   printf("Done!\n");
   return 0;
