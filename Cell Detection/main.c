@@ -9,19 +9,24 @@
 #include "sun.h"
 
 // Declaring input and output images in 3 demensions
-unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char newInput_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+//unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char final_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+//unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char output_image[BMP_WIDTH][BMP_HEIGHT];
+unsigned char input_image[BMP_WIDTH][BMP_HEIGHT];
+unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT];
 
 // they recomend a threshold around 90
 int threshold = 90;
 
 int main(int arcg, char **argv)
 {
-
+#if _DEBUG
     clock_t start, end;
     double cpu_time_used;
     start = clock();
+#endif
 
     if (arcg != 3)
     {
@@ -29,10 +34,10 @@ int main(int arcg, char **argv)
         exit(1);
     }
 
-    read_bitmap(argv[1], input_image);
+    read_bitmap(argv[1], newInput_image);
 
-    convert_to_gray(input_image, output_image);
-
+    convert_to_gray(newInput_image, output_image);
+         
     convert_to_binary_image(threshold, output_image);
 
     copy_bmp(output_image, buff_image);
@@ -49,16 +54,19 @@ int main(int arcg, char **argv)
         {
             break;
         };
-        count = count + detectCellsIterator(output_image, input_image);
+        count = count + detectCellsIterator(output_image, final_image);
     };
 
-    write_bitmap(input_image, argv[2]);
+    write_bitmap(final_image, argv[2]);
 
     printf("%d \n", count);
 
+#if _DEBUG
     end = clock();
     cpu_time_used = end - start;
-    printf("Total time: %f ms\n", cpu_time_used * 1000.0 / CLOCKS_PER_SEC);
+    printf("Total program time: %f ms\n", cpu_time_used * 1000.0 / CLOCKS_PER_SEC);
+#endif
+
 
     return 0;
 }

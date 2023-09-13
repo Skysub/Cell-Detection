@@ -6,44 +6,44 @@
 // int structuring_element[3][3] = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
 
 // This function converts the 3 dimension images to a 2 dimension image in gray scale. It goes through every pixel and calculate the averages value from the RGB values.
-void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
     for (int x = 0; x <= BMP_WIDTH; x++)
     {
         for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            buff_image[x][y][0] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+            output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
         }
     }
 }
 
 // This function converts the image to a binary with only white and black pixels. The threshold is a varible input.
-void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT])
 {
     for (int x = 0; x <= BMP_WIDTH; x++)
     {
         for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            if (buff_image[x][y][0] <= threshold)
-                (buff_image[x][y][0] = 0);
+            if (buff_image[x][y] <= threshold)
+                (buff_image[x][y] = 0);
             else
-                (buff_image[x][y][0] = 255);
+                (buff_image[x][y] = 255);
         }
     }
 }
 
-int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
     int stop = 1;
     for (int x = 0; x <= BMP_WIDTH; x++)
     {
         for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            if (input_image[x][y][0] == 255)
+            if (input_image[x][y] == 255)
             {
-                if (input_image[x + 1][y][0] == 0 || input_image[x - 1][y][0] == 0 || input_image[x][y + 1][0] == 0 || input_image[x][y - 1][0] == 0)
+                if (input_image[x + 1][y] == 0 || input_image[x - 1][y] == 0 || input_image[x][y + 1] == 0 || input_image[x][y - 1] == 0)
                 {
-                    output_image[x][y][0] = 0;
+                    output_image[x][y] = 0;
                     stop = 0;
                 }
             }
@@ -52,7 +52,7 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsign
     return stop;
 }
 
-void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
     for (int c = 0; c <= 3; c++)
     {
@@ -60,7 +60,7 @@ void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], un
         {
             for (int y = 0; y <= BMP_HEIGHT; y++)
             {
-                output_image[x][y][0] = input_image[x][y][0];
+                output_image[x][y] = input_image[x][y];
             }
         }
     }
@@ -89,19 +89,19 @@ void draw_red_cross(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNEL
 }
 
 int delCount = 0;
-void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], int row, int col)
+void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT], int row, int col)
 {
     delCount = delCount + 1;
     for (int x = row; x < row + 14; x++)
     {
         for (int y = col; y < col + 14; y++)
         {
-            output_image[x][y][0] = 0;
+            output_image[x][y] = 0;
         }
     }
 }
 
-int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], int row, int col)
+int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row, int col)
 {
     char delete = 1;
     char detection = 0;
@@ -116,7 +116,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
         {
             if (x == row || x == row + 13 || y == col || y == col + 13)
             {
-                if (input_image[x][y][0] != 0)
+                if (input_image[x][y] != 0)
                 {
                     delete = 0;
                     break;
@@ -132,7 +132,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
                 {
                     continue;
                 }
-                else if (input_image[x][y][0] != 0)
+                else if (input_image[x][y] != 0)
                 {
                     detection = 1;
                 }
@@ -148,7 +148,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
     return delete;
 }
 
-int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
 {
     int count = 0;
     for (int x = 0; x < BMP_WIDTH - 13; x++)
