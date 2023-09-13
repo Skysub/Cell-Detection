@@ -12,7 +12,8 @@ void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNE
     {
         for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+            //Bitshifting to divide by 4. Threshold is changed to account
+            output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
         }
     }
 }
@@ -34,6 +35,7 @@ void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][
 
 int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
+    //stop remains 1 when no pixels are eroded
     int stop = 1;
     for (int x = 0; x <= BMP_WIDTH; x++)
     {
@@ -88,10 +90,10 @@ void draw_red_cross(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNEL
     }
 }
 
-int delCount = 0;
+
 void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT], int row, int col)
+
 {
-    delCount = delCount + 1;
     for (int x = row; x < row + 14; x++)
     {
         for (int y = col; y < col + 14; y++)
@@ -103,12 +105,20 @@ void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT], int row, int 
 
 int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row, int col)
 {
-    char delete = 1;
-    char detection = 0;
+
+    // a is used to output analysis of the frame
+    // a = 0 means delete
+    // a = 1 means increment
+    // a = 2 means skip
+    #define delete 0
+    #define increment 1
+    #define skip 2
+    
+    char a = skip;
 
     for (int x = row; x < row + 14; x++)
     {
-        if (delete == 0)
+        if (a == increment)
         {
             break;
         }
@@ -118,7 +128,8 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
             {
                 if (input_image[x][y] != 0)
                 {
-                    delete = 0;
+                    //Cell detected in edge. Frame of analysis to be incremented forward
+                    a = increment;
                     break;
                 }
                 else
@@ -128,24 +139,20 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
             }
             else
             {
-                if (detection == 1)
+                //if cell has been detected inside the frame, then further analysis of the inside is nolonger needed
+                if (a == delete)
                 {
                     continue;
                 }
                 else if (input_image[x][y] != 0)
                 {
-                    detection = 1;
+                    a = delete;
                 }
             }
         }
     }
 
-    if (detection == 0)
-    {
-        delete = 0;
-    }
-
-    return delete;
+    return a;
 }
 
 int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
@@ -155,12 +162,18 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsign
     {
         for (int y = 0; y < BMP_HEIGHT - 13; y++)
         {
-            if (detectCellInstance(input_image, x, y) == 1)
+            int DCI = detectCellInstance(input_image, x, y);
+            if (DCI == 0)
             {
                 deleteCell(input_image, x, y);
                 draw_red_cross(output_image, x, y);
                 count++;
             }
+            else if (DCI == 2)
+            {
+                y = y + 13;
+            }
+            
         }
     }
     return count;
