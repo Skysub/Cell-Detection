@@ -51,13 +51,13 @@ int main(int arcg, char **argv)
     {
         i++;
         printf("%d \n", i);
-        erode(output_image, buff_image);
-        copy_bmp(output_image, buff_image);
-        if (erode(buff_image, output_image) == 1)
+
+        if (erode(output_image, buff_image) == 1)
         {
             break;
         };
-        count = count + detectCellsIterator(output_image, final_image);
+        count += detectCellsIterator(buff_image, final_image);
+        copy_bmp(buff_image, output_image);
     };
 
     write_bitmap(final_image, argv[2]);
