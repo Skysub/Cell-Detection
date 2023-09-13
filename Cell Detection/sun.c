@@ -12,7 +12,8 @@ void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNE
     {
         for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            buff_image[x][y][0] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+            //Bitshifting to divide by 4. Threshold is changed to account
+            buff_image[x][y][0] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
         }
     }
 }
@@ -34,6 +35,7 @@ void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][
 
 int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
 {
+    //stop remains 1 when no pixels are eroded
     int stop = 1;
     for (int x = 0; x <= BMP_WIDTH; x++)
     {
@@ -88,10 +90,8 @@ void draw_red_cross(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNEL
     }
 }
 
-int delCount = 0;
 void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], int row, int col)
 {
-    delCount = delCount + 1;
     for (int x = row; x < row + 14; x++)
     {
         for (int y = col; y < col + 14; y++)

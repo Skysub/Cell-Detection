@@ -17,7 +17,8 @@ unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 
 // they recomend a threshold around 90
-int threshold = 90;
+// Since we divide the sum by 4 instead of 3, the threshold is changed
+int threshold = 68;
 
 int main(int arcg, char **argv)
 {
