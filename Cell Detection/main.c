@@ -11,9 +11,6 @@
 #include "cbmp.h"
 #include "sun.h"
 
-#define max_cells 2000
-
-
 // Declaring image arrays
 unsigned char newInput_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char final_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
@@ -27,9 +24,13 @@ int threshold = 90;
 int main(int arcg, char **argv)
 {
 #if _DEBUG
-    clock_t startProgram, endProgram;
-    double cpu_time_used_program;
+    printf("%s \n", argv[1]);
+    printf("%s \n", argv[2]);
+
+    clock_t startProgram, endProgram, startProcessing, endProcessing;
+    double cpu_time_used_program, cpu_time_used_processing;
     startProgram = clock();
+    startProcessing = clock();
 #endif
 
     if (arcg != 3)
@@ -40,11 +41,6 @@ int main(int arcg, char **argv)
         exit(1);
     }
 
-#if _DEBUG
-    clock_t startProcessing, endProcessing;
-    double cpu_time_used_processing;
-    startProcessing = clock();
-#endif
 
     read_bitmap(argv[1], newInput_image);
 
@@ -65,6 +61,8 @@ int main(int arcg, char **argv)
 #endif
 
     int count = 0;
+    short cell_list[MAX_CELLS][2];
+    short cell_list_length = 0;
     while (true)
     {
 #if _DEBUG
@@ -75,14 +73,18 @@ int main(int arcg, char **argv)
         if (erode(output_image, buff_image)){
             break;
         };
-        count += detectCellsIterator(buff_image, final_image);
+        count += detectCellsIterator(buff_image, cell_list, &cell_list_length);
         copy_bmp(buff_image, output_image);
     };
 #if _DEBUG
     endLoop = clock();
 #endif
 
-    write_bitmap(final_image, argv[2]);
+    for (short i = 0; i < cell_list_length; i++)
+    {
+        draw_red_cross(newInput_image, cell_list[i][0], cell_list[i][1]);
+    }
+    write_bitmap(newInput_image, argv[2]);
 
     printf("%d \n", count);
 

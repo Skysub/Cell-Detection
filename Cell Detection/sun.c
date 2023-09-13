@@ -108,7 +108,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
 
     for (int x = row; x < row + 14; x++)
     {
-        if (delete == 0)
+        if (!delete)
         {
             break;
         }
@@ -121,14 +121,11 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
                     delete = 0;
                     break;
                 }
-                else
-                {
-                    continue;
-                }
+                continue;
             }
             else
             {
-                if (detection == 1)
+                if (detection)
                 {
                     continue;
                 }
@@ -148,9 +145,10 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
     return delete;
 }
 
-int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short cell_list[MAX_CELLS][2], short * cell_list_length)
 {
     int count = 0;
+
     for (int x = 0; x < BMP_WIDTH - 13; x++)
     {
         for (int y = 0; y < BMP_HEIGHT - 13; y++)
@@ -158,7 +156,10 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsign
             if (detectCellInstance(input_image, x, y) == 1)
             {
                 deleteCell(input_image, x, y);
-                draw_red_cross(output_image, x, y);
+                cell_list[*cell_list_length][0] = x;
+                cell_list[*cell_list_length][1] = y;
+                *cell_list_length += 1;
+
                 count++;
             }
         }
