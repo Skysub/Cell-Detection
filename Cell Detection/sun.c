@@ -158,12 +158,18 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHA
     {
         for (int y = 0; y < BMP_HEIGHT - 13; y++)
         {
-            if (detectCellInstance(input_image, x, y) == 1)
+            int DCI = detectCellInstance(input_image, x, y);
+            if (DCI == 0)
             {
                 deleteCell(input_image, x, y);
                 draw_red_cross(output_image, x, y);
                 count++;
             }
+            else if (DCI == 2)
+            {
+                y = y + 13;
+            }
+            
         }
     }
     return count;

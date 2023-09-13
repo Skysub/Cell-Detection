@@ -1,5 +1,5 @@
-//To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
-//To run (win): main.exe example.bmp example_inv.bmp
+//To compile (win): gcc cbmp.c sun.c main.c -o main.exe -std=c99
+//To run (win): main.exe example.bmp test.bmp
 
 // A Cool attempt to draw red crosses
 // More text on the way
