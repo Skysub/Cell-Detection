@@ -1,5 +1,5 @@
-//To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
-//To run (win): main.exe example.bmp example_inv.bmp
+//To compile (win): gcc cbmp.c sun.c main.c -o main.exe -std=c99
+//To run (win): main.exe example.bmp test.bmp
 
 // A Cool attempt to draw red crosses
 // More text on the way
@@ -19,7 +19,8 @@ unsigned char input_image[BMP_WIDTH][BMP_HEIGHT];
 unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT];
 
 // they recomend a threshold around 90
-int threshold = 90;
+// Since we divide the sum by 4 instead of 3, the threshold is changed
+int threshold = 68;
 
 int main(int arcg, char **argv)
 {

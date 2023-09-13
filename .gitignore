@@ -6,6 +6,7 @@ img_output.bmp
 
 # Prerequisites
 *.d
+*/test.bmp
 
 # Object files
 *.o
