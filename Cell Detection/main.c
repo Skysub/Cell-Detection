@@ -11,6 +11,9 @@
 #include "cbmp.h"
 #include "sun.h"
 
+#define max_cells 2000
+
+
 // Declaring image arrays
 unsigned char newInput_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char final_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
@@ -69,8 +72,7 @@ int main(int arcg, char **argv)
         printf("%d \n", i);
 #endif _DEBUG
 
-        if (erode(output_image, buff_image) == 1)
-        {
+        if (erode(output_image, buff_image)){
             break;
         };
         count += detectCellsIterator(buff_image, final_image);
