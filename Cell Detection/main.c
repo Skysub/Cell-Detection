@@ -11,11 +11,9 @@
 #include "cbmp.h"
 #include "sun.h"
 
-// Declaring input and output images in 3 demensions
+// Declaring image arrays
 unsigned char newInput_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-//unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char final_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-//unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char output_image[BMP_WIDTH][BMP_HEIGHT];
 unsigned char input_image[BMP_WIDTH][BMP_HEIGHT];
 unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT];
@@ -33,7 +31,9 @@ int main(int arcg, char **argv)
 
     if (arcg != 3)
     {
+#if _DEBUG
         printf("fail idiot\n");
+#endif
         exit(1);
     }
 
@@ -46,7 +46,7 @@ int main(int arcg, char **argv)
     read_bitmap(argv[1], newInput_image);
 
     convert_to_gray(newInput_image, output_image);
-         
+    
     convert_to_binary_image(threshold, output_image);
 
     copy_bmp(output_image, buff_image);
@@ -57,14 +57,17 @@ int main(int arcg, char **argv)
     clock_t startLoop, endLoop;
     double cpu_time_used_loop;
     startLoop = clock();
-#endif
 
     int i = 0;
+#endif
+
     int count = 0;
     while (true)
     {
+#if _DEBUG
         i++;
         printf("%d \n", i);
+#endif _DEBUG
 
         if (erode(output_image, buff_image) == 1)
         {
