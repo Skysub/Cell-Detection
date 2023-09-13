@@ -1,194 +1,64 @@
-//To compile (linux/mac): gcc cbmp.c main.c -o main.out -std=c99
-//To run (linux/mac): ./main.out example.bmp example_inv.bmp
+// A Cool attempt to draw red crosses
+// More text on the way
 
-//To compile (win): gcc cbmp.c main.c -o main.exe -std=c99
-//To run (win): main.exe example.bmp example_inv.bmp
-
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
 #include "cbmp.h"
+#include "sun.h"
 
-//Function to convert RGB picture to grayscale with arbitrary threshold
-void toGrayScale(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1]){
-  for (int x = 0; x < BMP_WIDTH; x++)
-  {
-    for (int y = 0; y < BMP_HEIGTH; y++)
-    {
+// Declaring input and output images in 3 demensions
+unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 
-      int v = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+// they recomend a threshold around 90
+int threshold = 90;
 
-      if (v > 120) {
-        output_image[x][y][0] = 255;
-        output_image[x][y][0] = 255;
-        output_image[x][y][0] = 255;
-      } else {
-        output_image[x][y][0] = 0;
-        output_image[x][y][0] = 0;
-        output_image[x][y][0] = 0;
-      }
-    }
-  }
-}
-
-int delCount = 0; 
-void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1],int row, int col){
-  delCount = delCount +1;
-  for (int x = row; x < row+14; x++)
-  {
-    for (int y = col; y < col+14; y++)
-    {
-      output_image[x][y][0] = 0;
-    }
-  }
-
-}
-
-int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1],int row, int col){
-  char delete = 1;
-  char detection = 0;
-  
-  for (int x = row; x < row+14; x++)
-  {
-    if (delete == 0) {break;}
-    for (int y = col; y < col+14; y++)
-    {
-      if (x == row || x == row+13 || y==col || y==col+13)
-      {
-        if (input_image[x][y][0] != 0) {
-          delete = 0;
-          break;
-        } else {
-          continue;
-        }
-
-      } else 
-      { 
-        if (detection == 1) {continue;}
-        else if (input_image[x][y][0] != 0) {detection = 1;}
-      }
-    }
-  }
-
-  if (detection == 0) {delete = 0;}  
-
-  return delete;
-}
-
-void detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1]){
-   for (int x = 0; x < BMP_WIDTH-13; x++)
-  {
-    for (int y = 0; y < BMP_HEIGTH-13; y++)
-    {
-      if (detectCellInstance(input_image, x, y) == 1)
-      {
-        deleteCell(input_image, x, y);
-      }
-    }
-  }
-}
-//Function to convert grayscale picture to RGB 
-void toRGB(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS]){
-  for (int x = 0; x < BMP_WIDTH; x++)
-  {
-    for (int y = 0; y < BMP_HEIGTH; y++)
-    {
-      output_image[x][y][0] = input_image[x][y][0];
-      output_image[x][y][1] = input_image[x][y][0];
-      output_image[x][y][2] = input_image[x][y][0];
-    }
-  }
-}
-
-//Function to erode grayscale picture 
-void erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1], unsigned char output_image[BMP_WIDTH][BMP_HEIGTH][1]){
-  for (int x = 0; x < BMP_WIDTH; x++)
-  {
-    for (int y = 0; y < BMP_HEIGTH; y++)
-    {
-      if (input_image[x+1][y][0] == 0 || input_image[x][y+1][0] == 0 || input_image[x-1][y][0] == 0 || input_image[x][y-1][0] == 0) 
-      {
-        output_image[x][y][0] = 0;
-      } else
-      {
-        output_image[x][y][0] = 255;
-      }
-    }
-  }
-}
-
-void removeEdges(unsigned char input_image[BMP_WIDTH][BMP_HEIGTH][1]) {
-  for (int i = 0; i < BMP_WIDTH; i++)
-  {
-    input_image[i][0][0] = 0;
-    input_image[i][BMP_HEIGTH-1][0] = 0;
-    input_image[0][i][0] = 0;
-    input_image[BMP_WIDTH-1][i][0] = 0;
-  }
-}
-
-  //Declaring the array to store the image (unsigned char = unsigned 8 bit)
-  //GS(Grayscale) for only 1 color dimension | RGB for 3 color dimensions
-  unsigned char RGB_image[BMP_WIDTH][BMP_HEIGTH][BMP_CHANNELS];
-  unsigned char GS_image[BMP_WIDTH][BMP_HEIGTH][1];
-  unsigned char GS_image2[BMP_WIDTH][BMP_HEIGTH][1];
-
-//Main function
-int main(int argc, char** argv)
+int main(int arcg, char **argv)
 {
-  //argc counts how may arguments are passed
-  //argv[0] is a string with the name of the program
-  //argv[1] is the first command line argument (input image)
-  //argv[2] is the second command line argument (output image)
 
-  //Checking that 2 arguments are passed
-  if (argc != 3)
-  {
-      fprintf(stderr, "Usage: %s <output file path> <output file path>\n", argv[0]);
-      exit(1);
-  }
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
 
-  printf("Example program - 02132 - A1\n");
+    if (arcg != 3)
+    {
+        printf("fail idiot\n");
+        exit(1);
+    }
 
-  //Load image from file
-  read_bitmap(argv[1], RGB_image);
+    read_bitmap(argv[1], input_image);
 
-  toGrayScale(RGB_image, GS_image);
+    convert_to_gray(input_image, output_image);
 
-  toRGB(GS_image,RGB_image);
+    convert_to_binary_image(threshold, output_image);
 
-  //Save image to file
-  write_bitmap(RGB_image, argv[2]);
-/*
-  removeEdges(GS_image);
+    copy_bmp(output_image, buff_image);
 
-  erode(GS_image, GS_image2);
-  detectCellsIterator(GS_image2);
-      
-  erode(GS_image2, GS_image);
-  detectCellsIterator(GS_image);
-      
-  erode(GS_image, GS_image2);
-  detectCellsIterator(GS_image2);
-      
-  erode(GS_image2, GS_image);
-  detectCellsIterator(GS_image);
-  
-  erode(GS_image, GS_image2);
-  detectCellsIterator(GS_image2);
-      
-  erode(GS_image2, GS_image);
-  detectCellsIterator(GS_image);
-  
-  erode(GS_image,GS_image2);
-  detectCellsIterator(GS_image2);
+    int i = 0;
+    int count = 0;
+    while (true)
+    {
+        i++;
+        printf("%d \n", i);
+        erode(output_image, buff_image);
+        copy_bmp(output_image, buff_image);
+        if (erode(buff_image, output_image) == 1)
+        {
+            break;
+        };
+        count = count + detectCellsIterator(output_image, input_image);
+    };
 
-  erode(GS_image2,GS_image);
-  detectCellsIterator(GS_image);
+    write_bitmap(input_image, argv[2]);
 
-  erode(GS_image,GS_image2);
-  detectCellsIterator(GS_image2);
-*/
-  printf("delCount = %d", delCount);
-  printf("Done!\n");
-  return 0;
+    printf("%d \n", count);
+
+    end = clock();
+    cpu_time_used = end - start;
+    printf("Total time: %f ms\n", cpu_time_used * 1000.0 / CLOCKS_PER_SEC);
+
+    return 0;
 }
