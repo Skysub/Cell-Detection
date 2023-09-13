@@ -126,6 +126,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
             {
                 if (input_image[x][y][0] != 0)
                 {
+                    //Cell detected in edge. Frame of analysis to be incremented forward
                     a = increment;
                     break;
                 }
@@ -136,6 +137,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
             }
             else
             {
+                //if cell has been detected inside the frame, then further analysis of the inside is nolonger needed
                 if (a == delete)
                 {
                     continue;
