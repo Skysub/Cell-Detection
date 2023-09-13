@@ -103,12 +103,20 @@ void deleteCell(unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS],
 
 int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], int row, int col)
 {
-    char delete = 1;
-    char detection = 0;
+
+    // a is used to output analysis of the frame
+    // a = 0 means delete
+    // a = 1 means increment
+    // a = 2 means skip
+    #define delete 0
+    #define increment 1
+    #define skip 2
+    
+    char a = skip;
 
     for (int x = row; x < row + 14; x++)
     {
-        if (delete == 0)
+        if (a == increment)
         {
             break;
         }
@@ -118,7 +126,7 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
             {
                 if (input_image[x][y][0] != 0)
                 {
-                    delete = 0;
+                    a = increment;
                     break;
                 }
                 else
@@ -128,24 +136,19 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHAN
             }
             else
             {
-                if (detection == 1)
+                if (a == delete)
                 {
                     continue;
                 }
                 else if (input_image[x][y][0] != 0)
                 {
-                    detection = 1;
+                    a = delete;
                 }
             }
         }
     }
 
-    if (detection == 0)
-    {
-        delete = 0;
-    }
-
-    return delete;
+    return a;
 }
 
 int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
