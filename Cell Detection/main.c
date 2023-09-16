@@ -73,21 +73,21 @@ int main(int arcg, char **argv)
 
         if (erode(output_image, buff_image)){
             break;
-        };
+        }
         count += detectCellsIterator(buff_image, cell_list, &cell_list_length);
         copy_bmp(buff_image, output_image);
-    };
+    }
 #if _DEBUG
     endLoop = clock();
 #endif
+    printf("%d \n", count);
 
     for (short i = 0; i < cell_list_length; i++)
     {
+        printf("(%d, %d)\n", cell_list[i][0], cell_list[i][1]);
         draw_red_cross(newInput_image, cell_list[i][0], cell_list[i][1]);
     }
     write_bitmap(newInput_image, argv[2]);
-
-    printf("%d \n", count);
 
 #if _DEBUG
     endProgram = clock();
@@ -98,7 +98,6 @@ int main(int arcg, char **argv)
     printf("Total image proprocesseing time: %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
     printf("Total algorithm runtime: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
 #endif
-
 
     return 0;
 }

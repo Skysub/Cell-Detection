@@ -43,7 +43,18 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
         {
             if (input_image[x][y] == 255)
             {
-                if (input_image[x + 1][y] == 0 || input_image[x - 1][y] == 0 || input_image[x][y + 1] == 0 || input_image[x][y - 1] == 0)
+                //Edge case
+                if (x == BMP_WIDTH || x == 0 || y == BMP_HEIGHT || y == 0){
+                    output_image[x][y] = 0;
+                    stop = 0;
+                    continue;
+                }
+
+                //main case
+                if (input_image[x + 1][y] == 0 ||
+                    input_image[x - 1][y] == 0 ||
+                    input_image[x][y + 1] == 0 ||
+                    input_image[x][y - 1] == 0)
                 {
                     output_image[x][y] = 0;
                     stop = 0;
@@ -56,14 +67,11 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
 
 void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
-    for (int c = 0; c <= 3; c++)
+    for (int x = 0; x <= BMP_WIDTH; x++)
     {
-        for (int x = 0; x <= BMP_WIDTH; x++)
+        for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            for (int y = 0; y <= BMP_HEIGHT; y++)
-            {
-                output_image[x][y] = input_image[x][y];
-            }
+            output_image[x][y] = input_image[x][y];
         }
     }
 }
@@ -114,43 +122,24 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
     #define increment 1
     #define skip 2
     
-    char a = skip;
+    //Checks the edge for cells
+    for (int x = row; x < row + 14; x++) {
+        if (input_image[x][col] != 0 || input_image[x][col+13] != 0) return increment;
+    }
+    for (int y = col+1; y < col + 13; y++){ 
+        if (input_image[row][y] != 0 || input_image[row+13][y] != 0) return increment;
+    }
 
-    for (int x = row; x < row + 14; x++)
+    //Checks the rest of the frame for cells
+    for (int x = row+1; x < row + 13; x++)
     {
-
-        if (a == increment)
+        for (int y = col+1; y < col + 13; y++)
         {
-            break;
-        }
-        for (int y = col; y < col + 14; y++)
-        {
-            if (x == row || x == row + 13 || y == col || y == col + 13)
-            {
-                if (input_image[x][y] != 0)
-                {
-                    //Cell detected in edge. Frame of analysis to be incremented forward
-                    a = increment;
-                    break;
-                }
-                continue;
-            }
-            else
-            {
-                //if cell has been detected inside the frame, then further analysis of the inside is nolonger needed
-                if (a == delete)
-                {
-                    continue;
-                }
-                else if (input_image[x][y] != 0)
-                {
-                    a = delete;
-                }
-            }
+            if (input_image[x][y] != 0) return delete;
         }
     }
 
-    return a;
+    return skip;
 }
 
 int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short cell_list[MAX_CELLS][2], short * cell_list_length)
