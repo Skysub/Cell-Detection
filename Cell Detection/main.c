@@ -73,10 +73,10 @@ int main(int arcg, char **argv)
 
         if (erode(output_image, buff_image)){
             break;
-        };
+        }
         count += detectCellsIterator(buff_image, cell_list, &cell_list_length);
         copy_bmp(buff_image, output_image);
-    };
+    }
 #if _DEBUG
     endLoop = clock();
 #endif

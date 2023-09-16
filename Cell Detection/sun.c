@@ -43,7 +43,18 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
         {
             if (input_image[x][y] == 255)
             {
-                if (input_image[x + 1][y] == 0 || input_image[x - 1][y] == 0 || input_image[x][y + 1] == 0 || input_image[x][y - 1] == 0)
+                //Edge case
+                if (x == BMP_WIDTH || x == 0 || y == BMP_HEIGHT || y == 0){
+                    output_image[x][y] = 0;
+                    stop = 0;
+                    continue;
+                }
+
+                //main case
+                if (input_image[x + 1][y] == 0 ||
+                    input_image[x - 1][y] == 0 ||
+                    input_image[x][y + 1] == 0 ||
+                    input_image[x][y - 1] == 0)
                 {
                     output_image[x][y] = 0;
                     stop = 0;
@@ -56,14 +67,11 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
 
 void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
-    for (int c = 0; c <= 3; c++)
+    for (int x = 0; x <= BMP_WIDTH; x++)
     {
-        for (int x = 0; x <= BMP_WIDTH; x++)
+        for (int y = 0; y <= BMP_HEIGHT; y++)
         {
-            for (int y = 0; y <= BMP_HEIGHT; y++)
-            {
-                output_image[x][y] = input_image[x][y];
-            }
+            output_image[x][y] = input_image[x][y];
         }
     }
 }
