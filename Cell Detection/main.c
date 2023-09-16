@@ -89,9 +89,6 @@ int main(int arcg, char **argv)
     }
     write_bitmap(newInput_image, argv[2]);
 
-
-
-
 #if _DEBUG
     endProgram = clock();
     cpu_time_used_program = endProgram - startProgram;
