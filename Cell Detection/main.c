@@ -45,18 +45,26 @@ int main(int arcg, char **argv)
         exit(1);
     }
 
+#if OUTPUT_INTERMEDIARY_IMAGES
     read_bitmap(argv[1], input_image);
     convert_to_gray(input_image, buff1_image);
-#if OUTPUT_INTERMEDIARY_IMAGES
+
     addThirdChannel(buff1_image, debug_image);
     write_bitmap(debug_image, "img_binary.bmp");
-#endif
+
     convert_to_binary_image(threshold, buff1_image);
-#if OUTPUT_INTERMEDIARY_IMAGES
+
     addThirdChannel(buff1_image, debug_image);
     write_bitmap(debug_image, "img_grey.bmp");
-#endif
+
     copy_bmp(buff1_image, buff2_image);
+#else
+    read_bitmap(argv[1], input_image);
+    convert_to_gray(input_image, buff1_image);
+    convert_to_binary_image(threshold, buff1_image);
+    copy_bmp(buff1_image, buff2_image);
+#endif
+
 
 #if _DEBUG
     endProcessing = clock();
