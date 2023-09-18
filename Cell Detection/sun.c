@@ -170,6 +170,7 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short 
     return count;
 }
 
+//Unused function
 unsigned char* addThirdChannelHeap(unsigned char input_image[BMP_WIDTH][BMP_WIDTH]) {
 
     unsigned char* output_image = malloc(sizeof(unsigned char) * BMP_WIDTH * BMP_WIDTH * 3);

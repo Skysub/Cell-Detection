@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cell Detection", "Cell Detection\Cell Detection.vcxproj", "{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CellDetection", "Cell Detection\Cell Detection.vcxproj", "{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,8 +13,8 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x64.ActiveCfg = Debug|x64
-		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x64.Build.0 = Debug|x64
+		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x64.ActiveCfg = Debug Folder|x64
+		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x64.Build.0 = Debug Folder|x64
 		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x86.ActiveCfg = Debug|Win32
 		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Debug|x86.Build.0 = Debug|Win32
 		{E5676FEE-3D55-4A10-AA3B-6007ED3704CC}.Release|x64.ActiveCfg = Release|x64
