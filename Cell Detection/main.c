@@ -11,12 +11,15 @@
 #include "cbmp.h"
 #include "sun.h"
 
+//Helps with debugging when the output doesn't contain the entire list of cell coordinates
+#define PRINT_CELL_LIST_IN_DEBUG 0
+#define OUTPUT_INTERMEDIARY_IMAGES 1
+
 // Declaring image arrays
-unsigned char newInput_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char final_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char output_image[BMP_WIDTH][BMP_HEIGHT];
-unsigned char input_image[BMP_WIDTH][BMP_HEIGHT];
-unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT];
+unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+unsigned char buff1_image[BMP_WIDTH][BMP_HEIGHT];
+unsigned char buff2_image[BMP_WIDTH][BMP_HEIGHT];
 
 // they recomend a threshold around 90
 // Since we divide the sum by 4 instead of 3, the threshold is changed
@@ -42,14 +45,18 @@ int main(int arcg, char **argv)
         exit(1);
     }
 
-
-    read_bitmap(argv[1], newInput_image);
-
-    convert_to_gray(newInput_image, output_image);
-    
-    convert_to_binary_image(threshold, output_image);
-
-    copy_bmp(output_image, buff_image);
+    read_bitmap(argv[1], input_image);
+    convert_to_gray(input_image, buff1_image);
+#if OUTPUT_INTERMEDIARY_IMAGES
+    addThirdChannel(buff1_image, debug_image);
+    write_bitmap(debug_image, "img_binary.bmp");
+#endif
+    convert_to_binary_image(threshold, buff1_image);
+#if OUTPUT_INTERMEDIARY_IMAGES
+    addThirdChannel(buff1_image, debug_image);
+    write_bitmap(debug_image, "img_grey.bmp");
+#endif
+    copy_bmp(buff1_image, buff2_image);
 
 #if _DEBUG
     endProcessing = clock();
@@ -71,11 +78,11 @@ int main(int arcg, char **argv)
         printf("%d \n", i);
 #endif _DEBUG
 
-        if (erode(output_image, buff_image)){
+        if (erode(buff1_image, buff2_image)){
             break;
         }
-        count += detectCellsIterator(buff_image, cell_list, &cell_list_length);
-        copy_bmp(buff_image, output_image);
+        count += detectCellsIterator(buff2_image, cell_list, &cell_list_length);
+        copy_bmp(buff2_image, buff1_image);
     }
 #if _DEBUG
     endLoop = clock();
@@ -84,10 +91,12 @@ int main(int arcg, char **argv)
 
     for (short i = 0; i < cell_list_length; i++)
     {
+#if !_DEBUG || PRINT_CELL_LIST_IN_DEBUG
         printf("(%d, %d)\n", cell_list[i][0], cell_list[i][1]);
-        draw_red_cross(newInput_image, cell_list[i][0], cell_list[i][1]);
+#endif
+        draw_red_cross(input_image, cell_list[i][0], cell_list[i][1]);
     }
-    write_bitmap(newInput_image, argv[2]);
+    write_bitmap(input_image, argv[2]);
 
 #if _DEBUG
     endProgram = clock();

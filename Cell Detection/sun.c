@@ -8,9 +8,9 @@
 // This function converts the 3 dimension images to a 2 dimension image in gray scale. It goes through every pixel and calculate the averages value from the RGB values.
 void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
-    for (int x = 0; x <= BMP_WIDTH; x++)
+    for (int x = 0; x < BMP_WIDTH; x++)
     {
-        for (int y = 0; y <= BMP_HEIGHT; y++)
+        for (int y = 0; y < BMP_HEIGHT; y++)
         {
             //Bitshifting to divide by 4. Threshold is changed to account
             output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
@@ -21,14 +21,14 @@ void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNE
 // This function converts the image to a binary with only white and black pixels. The threshold is a varible input.
 void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT])
 {
-    for (int x = 0; x <= BMP_WIDTH; x++)
+    for (int x = 0; x < BMP_WIDTH; x++)
     {
-        for (int y = 0; y <= BMP_HEIGHT; y++)
+        for (int y = 0; y < BMP_HEIGHT; y++)
         {
             if (buff_image[x][y] <= threshold)
-                (buff_image[x][y] = 0);
+                buff_image[x][y] = 0;
             else
-                (buff_image[x][y] = 255);
+                buff_image[x][y] = 255;
         }
     }
 }
@@ -37,9 +37,9 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
 {
     //stop remains 1 when no pixels are eroded
     int stop = 1;
-    for (int x = 0; x <= BMP_WIDTH; x++)
+    for (int x = 0; x < BMP_WIDTH; x++)
     {
-        for (int y = 0; y <= BMP_HEIGHT; y++)
+        for (int y = 0; y < BMP_HEIGHT; y++)
         {
             if (input_image[x][y] == 255)
             {
@@ -67,9 +67,9 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
 
 void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
-    for (int x = 0; x <= BMP_WIDTH; x++)
+    for (int x = 0; x < BMP_WIDTH; x++)
     {
-        for (int y = 0; y <= BMP_HEIGHT; y++)
+        for (int y = 0; y < BMP_HEIGHT; y++)
         {
             output_image[x][y] = input_image[x][y];
         }
@@ -146,9 +146,9 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short 
 {
     int count = 0;
 
-    for (int x = 0; x < BMP_WIDTH - 13; x++)
+    for (int x = 0; x < BMP_WIDTH - 12; x++)
     {
-        for (int y = 0; y < BMP_HEIGHT - 13; y++)
+        for (int y = 0; y < BMP_HEIGHT - 12; y++)
         {
             int DCI = detectCellInstance(input_image, x, y);
             if (DCI == 0)
@@ -168,4 +168,37 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short 
         }
     }
     return count;
+}
+
+unsigned char* addThirdChannelHeap(unsigned char input_image[BMP_WIDTH][BMP_WIDTH]) {
+
+    unsigned char* output_image = malloc(sizeof(unsigned char) * BMP_WIDTH * BMP_WIDTH * 3);
+    if (output_image == NULL) {
+        printf("addThirdChannel could not allocate memory for the output image");
+        exit(1);
+    }
+
+    for (int x = 0; x < BMP_WIDTH; x++)
+    {
+        for (int y = 0; y < BMP_HEIGHT; y++)
+        {
+            output_image[x + y * BMP_WIDTH] = input_image[x][y];
+            output_image[x + y * BMP_WIDTH + 1] = input_image[x][y];
+            output_image[x + y * BMP_WIDTH + 2] = input_image[x][y];
+        }
+    }
+    return output_image;
+}
+
+void addThirdChannel(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+{
+    for (int x = 0; x < BMP_WIDTH; x++)
+    {
+        for (int y = 0; y < BMP_HEIGHT; y++)
+        {
+            debug_image[x][y][0] = input_image[x][y];
+            debug_image[x][y][1] = input_image[x][y];
+            debug_image[x][y][2] = input_image[x][y];
+        }
+    }
 }
