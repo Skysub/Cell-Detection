@@ -10,6 +10,8 @@
 #include <time.h>
 #include "cbmp.h"
 #include "sun.h"
+#include <sys/stat.h>
+#include <string.h>
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST_IN_DEBUG 0
@@ -24,6 +26,7 @@ unsigned char buff2_image[BMP_WIDTH][BMP_HEIGHT];
 // they recomend a threshold around 90
 // Since we divide the sum by 4 instead of 3, the threshold is changed
 int threshold = 68;
+int folderMode = 0;
 
 int main(int arcg, char **argv)
 {
@@ -37,7 +40,7 @@ int main(int arcg, char **argv)
     startProcessing = clock();
 #endif
 
-    if (arcg != 3)
+    if (arcg < 2)
     {
 #if _DEBUG
         printf("fail idiot\n");
@@ -45,17 +48,42 @@ int main(int arcg, char **argv)
         exit(1);
     }
 
+
+    char img_name[60] = "";
+
+    if (folderMode) {
+    }
+    else {
+        int len = strlen(argv[1]) - 4;
+        if (len > 39) len = 39;
+        memcpy(img_name, argv[1], len);
+    }
+
 #if OUTPUT_INTERMEDIARY_IMAGES
+
+    //Names the output files
+ 
+    char grey_suffix[] = "_grey.bmp";
+    char binary_suffix[] = "_binary.bmp";
+
+    char grey_name[60] = "";
+    char binary_name[60] = "";
+
+    strcat(grey_name, img_name);
+    strcat(grey_name, grey_suffix);
+    strcat(binary_name, img_name);
+    strcat(binary_name, binary_suffix);
+
     read_bitmap(argv[1], input_image);
     convert_to_gray(input_image, buff1_image);
 
     addThirdChannel(buff1_image, debug_image);
-    write_bitmap(debug_image, "img_binary.bmp");
+    write_bitmap(debug_image, grey_name);
 
     convert_to_binary_image(threshold, buff1_image);
 
     addThirdChannel(buff1_image, debug_image);
-    write_bitmap(debug_image, "img_grey.bmp");
+    write_bitmap(debug_image, binary_name);
 
     copy_bmp(buff1_image, buff2_image);
 #else
@@ -104,7 +132,24 @@ int main(int arcg, char **argv)
 #endif
         draw_red_cross(input_image, cell_list[i][0], cell_list[i][1]);
     }
-    write_bitmap(input_image, argv[2]);
+    
+    char out_name[60] = "";
+    char suffix[] = "_output.bmp";
+
+    //Choosing a name for the output file based on whether there is given a name/suffix for the output file/files
+    if (arcg < 3){
+        strcat(img_name, suffix);
+        strcat(out_name, img_name);
+    }
+    else if (folderMode) {
+        strcat(img_name, argv[2]);
+        strcat(out_name, img_name);
+    }
+    else 
+        strcat(out_name, argv[2]);
+        
+    write_bitmap(input_image, out_name);
+        
 
 #if _DEBUG
     endProgram = clock();
