@@ -162,7 +162,7 @@ BMP *bopen(char *file_path)
     // printf("bmp->width %d\n", bmp->width);
     // printf("bmp->height %d\n", bmp->height);
     // printf("bmp->depth %d\n", bmp->depth);
-
+    
     if (!_validate_depth(bmp->depth))
     {
         _throw_error("Invalid file depth");
@@ -333,9 +333,14 @@ int _get_height(unsigned char *file_byte_contents)
 
 unsigned int _get_depth(unsigned char *file_byte_contents)
 {
-    if (_get_int_from_buffer(DEPTH_BYTES, DEPTH_OFFSET, file_byte_contents) == 32 || _get_int_from_buffer(DEPTH_BYTES, DEPTH_OFFSET, file_byte_contents) == 24)
+
+    if (_get_int_from_buffer(DEPTH_BYTES, DEPTH_OFFSET, file_byte_contents) == 32)
     {
-        return _get_int_from_buffer(DEPTH_BYTES, DEPTH_OFFSET, file_byte_contents);
+        return 32;
+    }
+    else if (_get_int_from_buffer(DEPTH_BYTES, DEPTH_OFFSET, file_byte_contents) == 24)
+    {
+        return 24;
     }
     else
     {
