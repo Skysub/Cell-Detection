@@ -17,9 +17,7 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST_IN_DEBUG 0
-#define OUTPUT_INTERMEDIARY_IMAGES 0
-//#define _DEBUG 1
-//#define _DEBUG_FOLDER 1
+#define OUTPUT_INTERMEDIARY_IMAGES 1
 
 // Declaring image arrays
 unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
