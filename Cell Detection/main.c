@@ -17,7 +17,8 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST_IN_DEBUG 0
-#define OUTPUT_INTERMEDIARY_IMAGES 1
+#define OUTPUT_INTERMEDIARY_IMAGES 0
+#define MAIN_IMAGE_OUTPUT 1
 
 // Declaring image arrays
 unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
@@ -177,6 +178,10 @@ int main(int arcg, char **argv)
 #endif
     printf("%d \n", count); //Prints the final cell count
 
+#if !MAIN_IMAGE_OUTPUT
+    continue;
+#endif
+
     for (short i = 0; i < cell_list_length; i++)
     {
 #if (!_DEBUG || PRINT_CELL_LIST_IN_DEBUG) && !NDEBUG_FOLDER
@@ -204,7 +209,8 @@ int main(int arcg, char **argv)
     if (folderMode) {
         char folder_out_name[70] = "";
         strcat(folder_out_name, output_folder);
-        sprintf(folder_out_name+8, "%d_", count);
+        char* bruh = (&folder_out_name[7]);
+        sprintf(bruh, "%d_", count);
         strcat(folder_out_name, out_name);
         write_bitmap(input_image, folder_out_name);
     }
