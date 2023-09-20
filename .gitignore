@@ -1,5 +1,9 @@
 #Vores egne ting
 img_output.bmp
+img_binary.bmp
+img_grey.bmp
+*.bmp
+
 
 # Prerequisites
 *.d
