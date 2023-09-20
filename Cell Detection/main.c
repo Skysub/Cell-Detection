@@ -1,8 +1,15 @@
 //To compile (win): gcc cbmp.c sun.c main.c -o main.exe -std=c99
 //To run (win): main.exe example.bmp test.bmp
 
-// A Cool attempt to draw red crosses
-// More text on the way
+
+//Debug flags need to come before include statements
+
+#ifndef _DEBUG //Compatibility with other IDE's than VS
+#ifndef NDEBUG
+#define _DEBUG 0
+#define _DEBUG_FOLDER 0
+#endif
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,13 +23,16 @@
 #include <dirent.h>
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
-#define PRINT_CELL_LIST_IN_DEBUG 0
+#define PRINT_CELL_LIST 0
 #define OUTPUT_INTERMEDIARY_IMAGES 0
-#define MAIN_IMAGE_OUTPUT 1
+#define MAIN_IMAGE_OUTPUT 0
+#define TIME_IT_ANYWAY 1
+
+//Declares the function, so the compiler doesn't freak out
+unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list);
 
 // Declaring image arrays
-unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
+//unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
 unsigned char buff1_image[BMP_WIDTH][BMP_HEIGHT];
 unsigned char buff2_image[BMP_WIDTH][BMP_HEIGHT];
 
@@ -33,14 +43,16 @@ int folderMode = 0;
 
 int main(int arcg, char **argv)
 {
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     printf("%s \n", argv[1]);
     printf("%s \n", argv[2]);
 
     clock_t startProgram, endProgram;
-    double cpu_time_used_program;
+    double cpu_time_used_program, average_algorithm_time = 0, average_img_processing_time = 0;
     startProgram = clock();
 #endif
+
+
 
     if (arcg < 2)
     {
@@ -76,6 +88,8 @@ int main(int arcg, char **argv)
         printf("\n");
 #endif
 
+        unsigned char* input_image = NULL;
+
     char img_name[60] = ""; //The buffer is larger than the names we allow the input file to have
                             //This is because we add a suffix to this string later
     if (folderMode) {
@@ -91,7 +105,7 @@ int main(int arcg, char **argv)
         memcpy(img_name, argv[1], len);
     }
 
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     clock_t startProcessing, endProcessing;
     double cpu_time_used_processing;
     startProcessing = clock();
@@ -119,11 +133,11 @@ int main(int arcg, char **argv)
     strcat(binary_name, binary_suffix);
 
     //loads the image file
-    if (folderMode) { 
-        read_bitmap(file_list[f], input_image);
-    }
-        else read_bitmap(argv[1], input_image);
+    input_image = loadImage(folderMode, argv[1], file_list[f]);
     convert_to_gray(input_image, buff1_image);
+    free(input_image); //The input image is no longer needed
+
+    unsigned char* debug_image = malloc(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS);
 
     //Output the greyscale version
     addThirdChannel(buff1_image, debug_image);
@@ -135,20 +149,23 @@ int main(int arcg, char **argv)
     addThirdChannel(buff1_image, debug_image);
     write_bitmap(debug_image, binary_name);
 
-    copy_bmp(buff1_image, buff2_image);
+    free(debug_image);
+
+    //copy_bmp(buff1_image, buff2_image);
 #else
-    if (folderMode) {
-        read_bitmap(file_list[f], input_image);
-    }
-    else read_bitmap(argv[1], input_image);
+    //loads the image file
+    input_image = loadImage(folderMode, argv[1], file_list[f]);
     convert_to_gray(input_image, buff1_image);
+    free(input_image); //The input image is no longer needed
     convert_to_binary_image(threshold, buff1_image);
     copy_bmp(buff1_image, buff2_image);
 #endif
 
 
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     endProcessing = clock();
+    cpu_time_used_processing = endProcessing - startProcessing;
+    average_img_processing_time += cpu_time_used_processing;
 
     clock_t startLoop, endLoop;
     double cpu_time_used_loop;
@@ -172,19 +189,26 @@ int main(int arcg, char **argv)
         count += detectCellsIterator(buff2_image, cell_list, &cell_list_length);
         copy_bmp(buff2_image, buff1_image);
     }
+
+#if _DEBUG || TIME_IT_ANYWAY
+    endLoop = clock();
+    cpu_time_used_loop = endLoop - startLoop;
+    average_algorithm_time += cpu_time_used_loop;
+#endif
 #if _DEBUG
     printf("\n");
-    endLoop = clock();
 #endif
     printf("%d \n", count); //Prints the final cell count
 
 #if !MAIN_IMAGE_OUTPUT
-    continue;
+    goto after_output;
 #endif
+
+    input_image = loadImage(folderMode, argv[1], file_list[f]);
 
     for (short i = 0; i < cell_list_length; i++)
     {
-#if (!_DEBUG || PRINT_CELL_LIST_IN_DEBUG) && !NDEBUG_FOLDER
+#if PRINT_CELL_LIST
         printf("(%d, %d)\n", cell_list[i][0], cell_list[i][1]);
 #endif
         draw_red_cross(input_image, cell_list[i][0], cell_list[i][1]);
@@ -216,18 +240,25 @@ int main(int arcg, char **argv)
     }
     else write_bitmap(input_image, out_name);
 
-#if _DEBUG
-    cpu_time_used_processing = endProcessing - startProcessing;
-    cpu_time_used_loop = endLoop - startLoop;
-    printf("Img proprocesseing time: %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
-    printf("Algorithm running time:  %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
+    free(input_image);
+
+    after_output:
+    ;
+#if _DEBUG  
+    printf("image processing time:  %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
+    printf("Algorithm running time: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
 #endif
 
-    }
+    } //End of file_list
 
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     endProgram = clock();
     cpu_time_used_program = endProgram - startProgram;
+
+    if (folderMode) {
+        printf("\nAverage image processing time:  %f ms\n", (average_img_processing_time / file_list_length) * 1000.0 / CLOCKS_PER_SEC);
+        printf("\nAverage Algorithm running time: %f ms\n", (average_algorithm_time / file_list_length) * 1000.0 / CLOCKS_PER_SEC);
+    }
     printf("\nTotal program time: %f ms\n", cpu_time_used_program * 1000.0 / CLOCKS_PER_SEC);
 #endif
 
@@ -277,4 +308,20 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
     }
 
     return 0;
+}
+
+unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list) {
+    unsigned char* input_image = malloc(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS); //Alocates space for the input image
+
+    if (input_image == NULL) {
+        printf("Could not allocate space for the input image");
+        exit(1);
+    }
+
+    if (folderMode) {
+        read_bitmap(file_name_from_list, input_image);
+    }
+    else read_bitmap(arg1, input_image);
+
+    return input_image;
 }

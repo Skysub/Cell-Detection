@@ -14,6 +14,9 @@ void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNE
         {
             //Bitshifting to divide by 4. Threshold is changed to account
             output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
+
+            //Sum times 11 and then bitshift to divide by 32. If 1 would be the perfect result, then this gives the result 1.03125
+            //output_image[x][y] = ((input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) * 11) >> 5;
         }
     }
 }
