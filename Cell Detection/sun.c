@@ -47,7 +47,7 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
             if (input_image[x][y] == 255)
             {
                 //Edge case
-                if (x == BMP_WIDTH || x == 0 || y == BMP_HEIGHT || y == 0){
+                if (x == BMP_WIDTH || x == 0 || y == BMP_HEIGHT || y == 0) {
                     output_image[x][y] = 0;
                     stop = 0;
                     continue;
@@ -62,7 +62,14 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output
                     output_image[x][y] = 0;
                     stop = 0;
                 }
+                else {
+                    output_image[x][y] = 255;
+                }
             }
+            else
+                //Det her er hurtigere end hvis vi bare satte output_image[x][y] = 0
+                //Det skylder nok compiler optimization
+                output_image[x][y] = input_image[x][y];
         }
     }
     return stop;

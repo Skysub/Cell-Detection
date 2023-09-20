@@ -24,22 +24,18 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST 0
-#define OUTPUT_INTERMEDIARY_IMAGES 0
-#define MAIN_IMAGE_OUTPUT 0
+#define OUTPUT_INTERMEDIARY_IMAGES 1
+#define MAIN_IMAGE_OUTPUT 1
 #define TIME_IT_ANYWAY 1
 
 //Declares the function, so the compiler doesn't freak out
 unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list);
-
-// Declaring image arrays
-//unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
-unsigned char buff1_image[BMP_WIDTH][BMP_HEIGHT];
-unsigned char buff2_image[BMP_WIDTH][BMP_HEIGHT];
+void throwError(char* errorMSG);
+void* mallocWithNullCheck(size_t size, char* errorMSG);
 
 // they recomend a threshold around 90
 // Since we divide the sum by 4 instead of 3, the threshold is changed
 int threshold = 68;
-int folderMode = 0;
 
 int main(int arcg, char **argv)
 {
@@ -54,18 +50,13 @@ int main(int arcg, char **argv)
 
 
 
-    if (arcg < 2)
-    {
-#if _DEBUG
-        printf("fail idiot\n");
-#endif
-        exit(1);
-    }
+    if (arcg < 2) throwError("fail idiot\n");
 
     //File list for folder mode
     char file_list[100][60];
     int file_list_length = 0;
     char output_folder[] = "output/";
+    int folderMode = 0;
 
     //Check if the input argument is a folder or a file
     struct stat buf;
@@ -73,8 +64,7 @@ int main(int arcg, char **argv)
     if (S_ISDIR(buf.st_mode)) {
         folderMode = true;
 
-        //Prints an error message and exits if the directory could not be opened
-        if(getImagePathsFromFolder(argv[1], file_list, &file_list_length)) exit(1);
+        getImagePathsFromFolder(argv[1], file_list, &file_list_length);
     }
     else file_list_length++;
 
@@ -89,6 +79,9 @@ int main(int arcg, char **argv)
 #endif
 
         unsigned char* input_image = NULL;
+        unsigned char* buff1_image;
+        unsigned char* buff2_image;
+
 
     char img_name[60] = ""; //The buffer is larger than the names we allow the input file to have
                             //This is because we add a suffix to this string later
@@ -134,10 +127,12 @@ int main(int arcg, char **argv)
 
     //loads the image file
     input_image = loadImage(folderMode, argv[1], file_list[f]);
+    buff1_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 1");
+
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
 
-    unsigned char* debug_image = malloc(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS);
+    unsigned char* debug_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS, "Could not allocate space for the debug image");
 
     //Output the greyscale version
     addThirdChannel(buff1_image, debug_image);
@@ -151,14 +146,14 @@ int main(int arcg, char **argv)
 
     free(debug_image);
 
-    //copy_bmp(buff1_image, buff2_image);
 #else
     //loads the image file
     input_image = loadImage(folderMode, argv[1], file_list[f]);
+    buff1_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 1");
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
     convert_to_binary_image(threshold, buff1_image);
-    copy_bmp(buff1_image, buff2_image);
+    //copy_bmp(buff1_image, buff2_image);
 #endif
 
 
@@ -174,9 +169,11 @@ int main(int arcg, char **argv)
     int i = 0;
 #endif
 
+    buff2_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 2");
     int count = 0;
     short cell_list[MAX_CELLS][2];
     short cell_list_length = 0;
+    unsigned char* temp;
     while (true)
     {
 #if _DEBUG
@@ -187,8 +184,14 @@ int main(int arcg, char **argv)
             break;
         }
         count += detectCellsIterator(buff2_image, cell_list, &cell_list_length);
-        copy_bmp(buff2_image, buff1_image);
+
+        //Switching the buffers
+        temp = buff1_image;
+        buff1_image = buff2_image;
+        buff2_image = temp;
     }
+    free(buff1_image); //Buffer images no longer needed
+    free(buff2_image);
 
 #if _DEBUG || TIME_IT_ANYWAY
     endLoop = clock();
@@ -274,14 +277,13 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
     dir = opendir(folder);
     if(dir == NULL){
         printf("Can't open folder %s", folder);
-        return 1;
+        exit(1);
     }
 
     //Loops through all items in the directory
     //adds their names to a list if the file extension is .bmp,
     //if the name isn't too short or too long, and if the list has room
     while ((item = readdir(dir)) != NULL) {
-
         //Checking filetype
         if (item->d_namlen > 3 &&
            item->d_namlen < 40 &&
@@ -311,12 +313,9 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
 }
 
 unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list) {
-    unsigned char* input_image = malloc(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS); //Alocates space for the input image
-
-    if (input_image == NULL) {
-        printf("Could not allocate space for the input image");
-        exit(1);
-    }
+    //Alocates space for the input image
+    unsigned char* input_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT * BMP_CHANNELS,
+                                                    "Could not allocate space for the input image"); 
 
     if (folderMode) {
         read_bitmap(file_name_from_list, input_image);
@@ -325,3 +324,19 @@ unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list) 
 
     return input_image;
 }
+
+void throwError(char* errorMSG) {
+    if (errorMSG == NULL) 
+        printf("Error Occured");
+    else
+        printf(errorMSG);
+
+    exit(1);
+}
+
+void* mallocWithNullCheck(size_t size, char* errorMSG){
+    void* out = malloc(size);
+    if (out == NULL) throwError(errorMSG);
+    return out;
+}
+
