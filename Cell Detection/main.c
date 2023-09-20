@@ -26,6 +26,7 @@
 #define PRINT_CELL_LIST 0
 #define OUTPUT_INTERMEDIARY_IMAGES 1
 #define MAIN_IMAGE_OUTPUT 1
+
 #define TIME_IT_ANYWAY 1
 
 //Declares the function, so the compiler doesn't freak out
@@ -201,6 +202,7 @@ int main(int arcg, char **argv)
 #if _DEBUG
     printf("\n");
 #endif
+
     printf("%d \n", count); //Prints the final cell count
 
 #if !MAIN_IMAGE_OUTPUT
@@ -250,6 +252,7 @@ int main(int arcg, char **argv)
 #if _DEBUG  
     printf("image processing time:  %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
     printf("Algorithm running time: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
+
 #endif
 
     } //End of file_list
