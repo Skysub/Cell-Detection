@@ -17,7 +17,9 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST_IN_DEBUG 0
-#define OUTPUT_INTERMEDIARY_IMAGES 1
+#define OUTPUT_INTERMEDIARY_IMAGES 0
+#define IMAGE_OUTPUT 0
+#define TIME_IT_ANYWAY 1
 
 // Declaring image arrays
 unsigned char debug_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS];
@@ -32,7 +34,7 @@ int folderMode = 0;
 
 int main(int arcg, char **argv)
 {
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     printf("%s \n", argv[1]);
     printf("%s \n", argv[2]);
 
@@ -175,6 +177,12 @@ int main(int arcg, char **argv)
     printf("\n");
     endLoop = clock();
 #endif
+
+#if !IMAGE_OUTPUT
+    goto after_output
+#endif
+
+    ;
     printf("%d \n", count); //Prints the final cell count
 
     for (short i = 0; i < cell_list_length; i++)
@@ -210,6 +218,8 @@ int main(int arcg, char **argv)
     }
     else write_bitmap(input_image, out_name);
 
+    after_output:
+    ;
 #if _DEBUG
     cpu_time_used_processing = endProcessing - startProcessing;
     cpu_time_used_loop = endLoop - startLoop;
@@ -219,7 +229,7 @@ int main(int arcg, char **argv)
 
     }
 
-#if _DEBUG
+#if _DEBUG || TIME_IT_ANYWAY
     endProgram = clock();
     cpu_time_used_program = endProgram - startProgram;
     printf("\nTotal program time: %f ms\n", cpu_time_used_program * 1000.0 / CLOCKS_PER_SEC);
