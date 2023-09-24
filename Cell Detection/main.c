@@ -139,8 +139,8 @@ int main(int arcg, char **argv)
     addThirdChannel(buff1_image, debug_image);
     write_bitmap(debug_image, grey_name);
 
-    convert_to_binary_image(threshold, buff1_image);
-    //convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
+    //convert_to_binary_image(threshold, buff1_image);
+    convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
 
     //Output the binary version
     addThirdChannel(buff1_image, debug_image);
@@ -154,8 +154,8 @@ int main(int arcg, char **argv)
     buff1_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 1");
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
-    convert_to_binary_image(threshold, buff1_image);
-    //convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
+    //convert_to_binary_image(threshold, buff1_image);
+    convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
     //copy_bmp(buff1_image, buff2_image);
 #endif
 
