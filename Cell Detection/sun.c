@@ -12,8 +12,11 @@ void convert_to_gray(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNE
     {
         for (int y = 0; y < BMP_HEIGHT; y++)
         {
+            //The most accurate (and slow) method
+            output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) / 3;
+
             //Bitshifting to divide by 4. Threshold is changed to account
-            output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
+            //output_image[x][y] = (input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) >> 2;
 
             //Sum times 11 and then bitshift to divide by 32. If 1 would be the perfect result, then this gives the result 1.03125
             //output_image[x][y] = ((input_image[x][y][0] + input_image[x][y][1] + input_image[x][y][2]) * 11) >> 5;
@@ -34,6 +37,65 @@ void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][
                 buff_image[x][y] = 255;
         }
     }
+}
+
+// This function uses otsu's method to calculate a threshold for the binary conversion of the image
+int calculate_threshold_otsu(unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT])
+{
+    //Creating the histogram
+    int levels[256];
+    for (int i = 0; i < 256; i++){
+        levels[i] = 0;
+    }
+
+    //Creatres histogram of occurences of a pixel values
+    for (int x = 0; x < BMP_WIDTH; x++){
+        for (int y = 0; y < BMP_HEIGHT; y++){
+            levels[buff_image[x][y]]++;
+        }
+    }
+
+    //Creates an array where each of the levels are converted to their ratio of occurence in the image
+    float totalPixels = BMP_WIDTH * BMP_HEIGHT;
+    float probabilities[256];
+    for (int i = 0; i < 256; i++) {
+        probabilities[i] = levels[i] / totalPixels;
+    }
+
+    //Loops through all possible thresholds and calculates their inter-class variance (otsu's method)
+    int largest = 0;
+    int best_threshold = 0;
+    for (int i = 1; i < 256; i++)
+    {
+        float w0 = 0, u0 = 0, w1 = 0, u1 = 0;
+        for (int j = 0; j < i; j++)
+        {
+            w0 += probabilities[j];
+            u0 += j * probabilities[j];
+        }
+        if (w0 < 0.01f || w0 > 0.99f) continue;
+        w1 = 1 - w0;
+        u0 = u0 / w0;
+
+        for (int j = i; j < 256; j++)
+        {
+            u1 += j * probabilities[j];
+        }
+        u1 = u1 / w1;
+        
+        float uT = w0 * u0 + w1 * u1;
+
+        //int sigma = w0 * (u0 * u0 + uT * uT - 2 * u0 * uT) + w1 * (u1 * u1 + uT * uT - 2 * u1 * uT);
+        int sigma = (w0*w1*((u0-u1)*(u0 - u1))); //Final variance calculation
+
+        //Checks to see if the variance is the largest seen so far, and remembers what threshold produces it
+        if (sigma > largest) { 
+            largest = sigma; 
+            best_threshold = i;
+        }
+    }
+    //Returns the threshold that performed the best (otsu's method)
+    return best_threshold;
 }
 
 int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])

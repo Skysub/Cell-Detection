@@ -10,3 +10,4 @@ void draw_red_cross(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNEL
 int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short cell_list[MAX_CELLS][2], short * cell_list_length);
 void addThirdChannel(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS]);
 unsigned char* addThirdChannelHeap(unsigned char input_image[BMP_WIDTH][BMP_WIDTH]);
+int calculate_threshold_otsu(unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT]);

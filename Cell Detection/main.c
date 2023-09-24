@@ -1,9 +1,7 @@
 //To compile (win): gcc cbmp.c sun.c main.c -o main.exe -std=c99
 //To run (win): main.exe example.bmp test.bmp
 
-
 //Debug flags need to come before include statements
-
 #ifndef _DEBUG //Compatibility with other IDE's than VS
 #ifndef NDEBUG
 #define _DEBUG 0
@@ -23,11 +21,11 @@
 #include <dirent.h>
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
-#define PRINT_CELL_LIST 0
-#define OUTPUT_INTERMEDIARY_IMAGES 1
+#define PRINT_CELL_LIST 1
+#define OUTPUT_INTERMEDIARY_IMAGES 0
 #define MAIN_IMAGE_OUTPUT 1
 
-#define TIME_IT_ANYWAY 1
+#define TIME_IT_ANYWAY 0
 
 //Declares the function, so the compiler doesn't freak out
 unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list);
@@ -36,7 +34,8 @@ void* mallocWithNullCheck(size_t size, char* errorMSG);
 
 // they recomend a threshold around 90
 // Since we divide the sum by 4 instead of 3, the threshold is changed
-int threshold = 68;
+// Unused ever since implementing otsu's method for dynamic threshold calculation
+int static_threshold = 68;
 
 int main(int arcg, char **argv)
 {
@@ -48,8 +47,6 @@ int main(int arcg, char **argv)
     double cpu_time_used_program, average_algorithm_time = 0, average_img_processing_time = 0;
     startProgram = clock();
 #endif
-
-
 
     if (arcg < 2) throwError("fail idiot\n");
 
@@ -82,7 +79,6 @@ int main(int arcg, char **argv)
         unsigned char* input_image = NULL;
         unsigned char* buff1_image;
         unsigned char* buff2_image;
-
 
     char img_name[60] = ""; //The buffer is larger than the names we allow the input file to have
                             //This is because we add a suffix to this string later
@@ -139,7 +135,7 @@ int main(int arcg, char **argv)
     addThirdChannel(buff1_image, debug_image);
     write_bitmap(debug_image, grey_name);
 
-    convert_to_binary_image(threshold, buff1_image);
+    convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
 
     //Output the binary version
     addThirdChannel(buff1_image, debug_image);
@@ -153,7 +149,7 @@ int main(int arcg, char **argv)
     buff1_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 1");
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
-    convert_to_binary_image(threshold, buff1_image);
+    convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
     //copy_bmp(buff1_image, buff2_image);
 #endif
 
@@ -236,11 +232,14 @@ int main(int arcg, char **argv)
 
     //outputs the final processed image
     if (folderMode) {
+        //Pieces together the name and path
         char folder_out_name[70] = "";
         strcat(folder_out_name, output_folder);
         char* bruh = (&folder_out_name[7]);
         sprintf(bruh, "%d_", count);
         strcat(folder_out_name, out_name);
+
+        //writes the image
         write_bitmap(input_image, folder_out_name);
     }
     else write_bitmap(input_image, out_name);
@@ -249,7 +248,7 @@ int main(int arcg, char **argv)
 
     after_output:
     ;
-#if _DEBUG  
+#if _DEBUG
     printf("image processing time:  %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
     printf("Algorithm running time: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
 
@@ -287,7 +286,7 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
     //adds their names to a list if the file extension is .bmp,
     //if the name isn't too short or too long, and if the list has room
     while ((item = readdir(dir)) != NULL) {
-        //Checking filetype
+        //Checking filetype (.bmp) and prevents buffer overflow
         if (item->d_namlen > 3 &&
            item->d_namlen < 40 &&
            item->d_name[item->d_namlen - 4] == '.' &&
@@ -296,6 +295,7 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
            item->d_name[item->d_namlen - 1] == 'p' &&
            *file_list_length < 100) {
 
+            //Constructs the path to the file and adds it to the list
             char temp[60] = "";
             strcat(temp, folder);
             strcat(temp, "/");
@@ -337,6 +337,7 @@ void throwError(char* errorMSG) {
     exit(1);
 }
 
+//Makes the rest of the code easier to read by shoving error handling out of the way
 void* mallocWithNullCheck(size_t size, char* errorMSG){
     void* out = malloc(size);
     if (out == NULL) throwError(errorMSG);
