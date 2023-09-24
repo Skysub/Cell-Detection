@@ -49,7 +49,7 @@ int main(int arcg, char **argv)
     startProgram = clock();
 #endif
 
-
+    int threshold_temp = 0;
 
     if (arcg < 2) throwError("fail idiot\n");
 
@@ -154,7 +154,7 @@ int main(int arcg, char **argv)
     buff1_image = mallocWithNullCheck(BMP_WIDTH * BMP_HEIGHT, "Could not allocate space for buffer image 1");
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
-    //convert_to_binary_image(threshold, buff1_image);
+    threshold_temp = calculate_threshold_otsu(buff1_image);
     convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
     //copy_bmp(buff1_image, buff2_image);
 #endif
@@ -205,7 +205,8 @@ int main(int arcg, char **argv)
     printf("\n");
 #endif
 
-    printf("%d \n", count); //Prints the final cell count
+    //printf("%d \n", count); //Prints the final cell count
+    printf("%d, %d \n", count, threshold_temp); //Prints the final cell count
 
 #if !MAIN_IMAGE_OUTPUT
     goto after_output;
