@@ -45,68 +45,54 @@ int calculate_threshold_otsu(unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT])
         levels[i] = 0;
     }
 
+    //Creatres histogram of occurences of a pixel values
     for (int x = 0; x < BMP_WIDTH; x++){
         for (int y = 0; y < BMP_HEIGHT; y++){
             levels[buff_image[x][y]]++;
         }
     }
 
+    //Creates an array where each of the levels are converted to their ratio of occurence in the image
     float totalPixels = BMP_WIDTH * BMP_HEIGHT;
     float probabilities[256];
     for (int i = 0; i < 256; i++) {
         probabilities[i] = levels[i] / totalPixels;
     }
 
-    
-
+    //Loops through all possible thresholds and calculates their inter-class variance (otsu's method)
     int largest = 0;
-    int largest_index = 0;
+    int best_threshold = 0;
     for (int i = 1; i < 256; i++)
     {
         float w0 = 0, u0 = 0, w1 = 0, u1 = 0;
         for (int j = 0; j < i; j++)
         {
             w0 += probabilities[j];
+            u0 += j * probabilities[j];
         }
+        if (w0 < 0.01f || w0 > 0.99f) continue;
+        w1 = 1 - w0;
+        u0 = u0 / w0;
 
         for (int j = i; j < 256; j++)
         {
-            w1 += probabilities[j];
+            u1 += j * probabilities[j];
         }
+        u1 = u1 / w1;
+        
+        float uT = w0 * u0 + w1 * u1;
 
-        if (w0 != 0) {
-            for (int j = 0; j < i; j++)
-            {
-                u0 += j * probabilities[j];
-            }
-            u0 = u0 / w0;
-        }
+        //int sigma = w0 * (u0 * u0 + uT * uT - 2 * u0 * uT) + w1 * (u1 * u1 + uT * uT - 2 * u1 * uT);
+        int sigma = (w0*w1*((u0-u1)*(u0 - u1))); //Final variance calculation
 
-        if (w1 != 0) {
-            for (int j = i; j < 256; j++)
-            {
-                u1 += j * probabilities[j];
-            }
-            u1 = u1 / w1;
-        }
-
-        float uT = 0;
-        for (int j = 0; j < 256; j++)
-        {
-            uT += j * probabilities[j];
-        }
-
-        //printf("Should be 0 = %f\n", ((w0*u0+w1*u1)-uT));
-        //printf("Should be 1 = %f\n", (w0+w1));
-
-        int sigma = w0 * (u0 * u0 + uT * uT - 2 * u0 * uT) + w1 * (u1 * u1 + uT * uT - 2 * u1 * uT);
+        //Checks to see if the variance is the largest seen so far, and remembers what threshold produces it
         if (sigma > largest) { 
             largest = sigma; 
-            largest_index = i;
+            best_threshold = i;
         }
-
     }
-    return largest_index;
+    //Returns the threshold that performed the best (otsu's method)
+    return best_threshold;
 }
 
 int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
