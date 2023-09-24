@@ -24,8 +24,8 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST 0
-#define OUTPUT_INTERMEDIARY_IMAGES 1
-#define MAIN_IMAGE_OUTPUT 1
+#define OUTPUT_INTERMEDIARY_IMAGES 0
+#define MAIN_IMAGE_OUTPUT 0
 
 #define TIME_IT_ANYWAY 1
 
@@ -140,6 +140,7 @@ int main(int arcg, char **argv)
     write_bitmap(debug_image, grey_name);
 
     convert_to_binary_image(threshold, buff1_image);
+    //convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
 
     //Output the binary version
     addThirdChannel(buff1_image, debug_image);
@@ -154,6 +155,7 @@ int main(int arcg, char **argv)
     convert_to_gray(input_image, buff1_image);
     free(input_image); //The input image is no longer needed
     convert_to_binary_image(threshold, buff1_image);
+    //convert_to_binary_image(calculate_threshold_otsu(buff1_image), buff1_image); //otsu's method
     //copy_bmp(buff1_image, buff2_image);
 #endif
 
@@ -249,7 +251,7 @@ int main(int arcg, char **argv)
 
     after_output:
     ;
-#if _DEBUG  
+#if _DEBUG
     printf("image processing time:  %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
     printf("Algorithm running time: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
 

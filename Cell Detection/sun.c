@@ -36,6 +36,79 @@ void convert_to_binary_image(int threshold, unsigned char buff_image[BMP_WIDTH][
     }
 }
 
+// This function uses otsu's method to calculate a threshold for the binary conversion of the image
+int calculate_threshold_otsu(unsigned char buff_image[BMP_WIDTH][BMP_HEIGHT])
+{
+    //Creating the histogram
+    int levels[256];
+    for (int i = 0; i < 256; i++){
+        levels[i] = 0;
+    }
+
+    for (int x = 0; x < BMP_WIDTH; x++){
+        for (int y = 0; y < BMP_HEIGHT; y++){
+            levels[buff_image[x][y]]++;
+        }
+    }
+
+    float totalPixels = BMP_WIDTH * BMP_HEIGHT;
+    float probabilities[256];
+    for (int i = 0; i < 256; i++) {
+        probabilities[i] = levels[i] / totalPixels;
+    }
+
+    
+
+    int largest = 0;
+    int largest_index = 0;
+    for (int i = 1; i < 256; i++)
+    {
+        float w0 = 0, u0 = 0, w1 = 0, u1 = 0;
+        for (int j = 0; j < i; j++)
+        {
+            w0 += probabilities[j];
+        }
+
+        for (int j = i; j < 256; j++)
+        {
+            w1 += probabilities[j];
+        }
+
+        if (w0 != 0) {
+            for (int j = 0; j < i; j++)
+            {
+                u0 += j * probabilities[j];
+            }
+            u0 = u0 / w0;
+        }
+
+        if (w1 != 0) {
+            for (int j = i; j < 256; j++)
+            {
+                u1 += j * probabilities[j];
+            }
+            u1 = u1 / w1;
+        }
+
+        float uT = 0;
+        for (int j = 0; j < 256; j++)
+        {
+            uT += j * probabilities[j];
+        }
+
+        //printf("Should be 0 = %f\n", ((w0*u0+w1*u1)-uT));
+        //printf("Should be 1 = %f\n", (w0+w1));
+
+        int sigma = w0 * (u0 * u0 + uT * uT - 2 * u0 * uT) + w1 * (u1 * u1 + uT * uT - 2 * u1 * uT);
+        if (sigma > largest) { 
+            largest = sigma; 
+            largest_index = i;
+        }
+
+    }
+    return largest_index;
+}
+
 int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT])
 {
     //stop remains 1 when no pixels are eroded
