@@ -21,11 +21,11 @@
 #include <dirent.h>
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
-#define PRINT_CELL_LIST 1
-#define OUTPUT_INTERMEDIARY_IMAGES 0
+#define PRINT_CELL_LIST 0
+#define OUTPUT_INTERMEDIARY_IMAGES 1
 #define MAIN_IMAGE_OUTPUT 1
 
-#define TIME_IT_ANYWAY 0
+#define TIME_IT_ANYWAY 1
 
 //Declares the function, so the compiler doesn't freak out
 unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list);
@@ -171,6 +171,10 @@ int main(int arcg, char **argv)
     short cell_list[MAX_CELLS][2];
     short cell_list_length = 0;
     unsigned char* temp;
+    double et = 0;
+    double dt = 0;
+    double st = 0;
+    clock_t testTimer;
     erode(buff1_image, buff2_image);
     erode(buff2_image, buff1_image);
     while (true)
@@ -179,18 +183,34 @@ int main(int arcg, char **argv)
         printf("%d ", i++); //Prints the amount of times the loop has run
 #endif
 
+        testTimer = clock();
         if (erode(buff1_image, buff2_image)) {
             break;
         }
+        et = et + (double)(clock() - testTimer)/CLOCKS_PER_SEC;
+        testTimer = clock();
+
+        //detecting cells
         count += detectCellsIterator(buff2_image, cell_list, &cell_list_length);
+     
+        dt = dt + (double)(clock() - testTimer)/CLOCKS_PER_SEC;
+        testTimer = clock();
 
         //Switching the buffers
         temp = buff1_image;
         buff1_image = buff2_image;
         buff2_image = temp;
+
+        st = st + (double)(clock() - testTimer)/CLOCKS_PER_SEC;
+        testTimer = clock();
+
     }
     free(buff1_image); //Buffer images no longer needed
     free(buff2_image);
+
+    printf("Time for erosion: %f \n", et * 1000.0);
+    printf("Time for detection: %f \n", dt * 1000.0);
+    printf("Time for switching: %f \n", st * 1000.0);
 
 #if _DEBUG || TIME_IT_ANYWAY
     endLoop = clock();
@@ -311,7 +331,7 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
     //creates the output folder if it doesn't already exist
     struct stat st;
     if (stat("output", &st) == -1) {
-        mkdir("output", 0777);
+        mkdir("output");
     }
 
     return 0;

@@ -193,11 +193,19 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
     #define delete 0
     #define increment 1
     #define skip 2
+
+
+    if ((input_image[row+13][col] != 0) || (input_image[row+13][col+13] != 0)) 
+    { 
+        return skip; 
+    }
+    
     
     //Checks the edge for cells
     for (int x = row; x < row + 14; x++) {
         if (input_image[x][col] != 0 || input_image[x][col+13] != 0) return increment;
     }
+
     for (int y = col+1; y < col + 13; y++){ 
         if (input_image[row][y] != 0 || input_image[row+13][y] != 0) return increment;
     }
