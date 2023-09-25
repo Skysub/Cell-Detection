@@ -26,6 +26,10 @@ int main(int arcg, char **argv)
     double cpu_time_used;
     start = clock();
 
+    clock_t startProcessing, endProcessing;
+    double cpu_time_used_processing;
+    startProcessing = clock();
+
     if (arcg != 3)
     {
         printf("fail idiot\n");
@@ -39,6 +43,13 @@ int main(int arcg, char **argv)
     convert_to_binary_image(threshold, output_image);
 
     copy_bmp(output_image, buff_image);
+
+    endProcessing = clock();
+    cpu_time_used_processing = endProcessing - startProcessing;
+
+    clock_t startLoop, endLoop;
+    double cpu_time_used_loop;
+    startLoop = clock();
 
     int i = 0;
     int count = 0;
@@ -55,12 +66,17 @@ int main(int arcg, char **argv)
         count = count + detectCellsIterator(output_image, input_image);
     };
 
+    endLoop = clock();
+    cpu_time_used_loop = endLoop - startLoop;
+
     write_bitmap(input_image, argv[2]);
 
     printf("%d \n", count);
 
     end = clock();
     cpu_time_used = end - start;
+    printf("image processing time:  %f ms\n", cpu_time_used_processing * 1000.0 / CLOCKS_PER_SEC);
+    printf("Algorithm running time: %f ms\n", cpu_time_used_loop * 1000.0 / CLOCKS_PER_SEC);
     printf("Total time: %f ms\n", cpu_time_used * 1000.0 / CLOCKS_PER_SEC);
 
     return 0;

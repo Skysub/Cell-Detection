@@ -52,15 +52,16 @@ int erode(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsign
     return stop;
 }
 
-void copy_bmp(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char output_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
+void copy_bmp(unsigned char in_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS], unsigned char out_image[BMP_WIDTH][BMP_HEIGHT][BMP_CHANNELS])
 {
-    for (int c = 0; c <= 3; c++)
+    for (int c = 0; c < 3; c++)
     {
-        for (int x = 0; x <= BMP_WIDTH; x++)
+        for (int x = 0; x < BMP_WIDTH; x++)
         {
-            for (int y = 0; y <= BMP_HEIGHT; y++)
+            for (int y = 0; y < BMP_HEIGHT; y++)
             {
-                output_image[x][y][0] = input_image[x][y][0];
+                char temp = in_image[x][y][0];
+                out_image[x][y][0] = temp;
             }
         }
     }
