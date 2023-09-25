@@ -171,6 +171,8 @@ int main(int arcg, char **argv)
     short cell_list[MAX_CELLS][2];
     short cell_list_length = 0;
     unsigned char* temp;
+    erode(buff1_image, buff2_image);
+    erode(buff2_image, buff1_image);
     while (true)
     {
 #if _DEBUG
