@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
-#include <dirent.h>
+#include "dirent.h"
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST 0
@@ -331,7 +331,7 @@ int getImagePathsFromFolder(const char folder[], char file_list[100][60], int* f
     //creates the output folder if it doesn't already exist
     struct stat st;
     if (stat("output", &st) == -1) {
-        mkdir("output");
+        mkdir("output",0777);
     }
 
     return 0;
