@@ -22,10 +22,10 @@
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST 0
-#define OUTPUT_INTERMEDIARY_IMAGES 1
-#define MAIN_IMAGE_OUTPUT 1
+#define OUTPUT_INTERMEDIARY_IMAGES 0
+#define MAIN_IMAGE_OUTPUT 0
 
-#define TIME_IT_ANYWAY 1
+#define TIME_IT_ANYWAY 0
 
 //Declares the function, so the compiler doesn't freak out
 unsigned char* loadImage(int folderMode, char* arg1, char* file_name_from_list);
