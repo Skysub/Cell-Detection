@@ -194,12 +194,10 @@ int detectCellInstance(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], int row
     #define increment 1
     #define skip 2
 
-
     if ((input_image[row+13][col] != 0) || (input_image[row+13][col+13] != 0)) 
     { 
         return skip; 
     }
-    
     
     //Checks the edge for cells
     for (int x = row; x < row + 14; x++) {
@@ -242,7 +240,7 @@ int detectCellsIterator(unsigned char input_image[BMP_WIDTH][BMP_HEIGHT], short 
             }
             else if (DCI == 2)
             {
-                y = y + 13;
+                y = y + 12;
             }
             
         }
