@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
-#include <dirent.h>
+#include "dirent.h"
 
 //Helps with debugging when the output doesn't contain the entire list of cell coordinates
 #define PRINT_CELL_LIST 1
